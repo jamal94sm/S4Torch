@@ -245,6 +245,9 @@ def main(
     auto_scale_batch_size = batch_size == -1
     seq_dataset = _get_seq_wrapper(dataset.strip())()
 
+    seq_dataset.data = seq_dataset.data[:10000, :, :]
+    seq_dataset.targets = seq_dataset.targets[:10000]
+
     pl_model = LighteningS4Model(
         S4Model(
             d_input=max(1, seq_dataset.channels),
