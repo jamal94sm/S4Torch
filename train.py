@@ -245,8 +245,21 @@ def main(
     auto_scale_batch_size = batch_size == -1
     seq_dataset = _get_seq_wrapper(dataset.strip())()
 
-    seq_dataset.data = seq_dataset.data[:1000, :, :]
-    seq_dataset.targets = seq_dataset.targets[:1000]
+    # split the data
+    """
+    seq_dataset_1 = seq_dataset
+    seq_dataset_2 = seq_dataset
+    
+    seq_dataset_1.data = seq_dataset.data[:10_000, :, :]
+    seq_dataset_1.targets = seq_dataset.targets[:10_000]
+    
+    seq_dataset_2.data = seq_dataset.data[10_000:20_000, :, :]
+    seq_dataset_2.targets = seq_dataset.targets[10_000:20_000]
+    """
+
+    seq_dataset.data = seq_dataset.data[:10_000, :, :]
+    seq_dataset.targets = seq_dataset.targets[:10_000]
+
 
     pl_model = LighteningS4Model(
         S4Model(
