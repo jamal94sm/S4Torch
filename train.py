@@ -162,7 +162,7 @@ class LighteningS4Model(pl.LightningModule):
 def main(
     # Dataset
     dataset: str,
-    data_length: int = 60_000,
+    data_length: int = 30_000,
     batch_size: int = -1,
     val_prop: float = 0.1,
     # Model
