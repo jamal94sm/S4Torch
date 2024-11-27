@@ -162,6 +162,7 @@ class LighteningS4Model(pl.LightningModule):
 def main(
     # Dataset
     dataset: str,
+    data_length: int = 60_000
     batch_size: int = -1,
     val_prop: float = 0.1,
     # Model
@@ -257,8 +258,8 @@ def main(
     seq_dataset_2.targets = seq_dataset.targets[10_000:20_000]
     """
 
-    seq_dataset.data = seq_dataset.data[:10_000, :, :]
-    seq_dataset.targets = seq_dataset.targets[:10_000]
+    seq_dataset.data = seq_dataset.data[:data_length, :, :]
+    seq_dataset.targets = seq_dataset.targets[:data_length]
 
 
     pl_model = LighteningS4Model(
