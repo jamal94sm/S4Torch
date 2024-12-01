@@ -27,7 +27,7 @@ def _log_step_initializer(
 def _make_omega_l(l_max: int, dtype: torch.dtype = torch.complex64) -> torch.Tensor:
     return torch.arange(l_max).type(dtype).mul(2j * np.pi / l_max).exp()
 
-
+'''
 def _make_hippo(N: int) -> np.ndarray:
     def idx2value(n: int, k: int) -> Union[int, float]:
         if n > k:
@@ -42,10 +42,23 @@ def _make_hippo(N: int) -> np.ndarray:
         for j in range(N):
             hippo[i, j] = idx2value(i + 1, j + 1)
     return hippo
+'''
+def _make_diagonal(N: int) -> np.ndarray:
+    def idx2value(n: int, k: int) -> Union[int, float]:
+        if n == k:
+            return n + 1
+        else:
+            return 0
 
+    hippo = np.zeros((N, N))
+    for i in range(N):
+        for j in range(N):
+            hippo[i, j] = idx2value(i + 1, j + 1)
+    return hippo
+    
 
 def _make_nplr_hippo(N: int) -> tuple[np.ndarray, ...]:
-    nhippo = -1 * _make_hippo(N)
+    nhippo = -1 * _make_diagonal(N)
 
     p = 0.5 * np.sqrt(2 * np.arange(1, N + 1) + 1.0)
     q = 2 * p
