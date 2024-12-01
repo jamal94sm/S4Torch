@@ -27,7 +27,7 @@ def _log_step_initializer(
 def _make_omega_l(l_max: int, dtype: torch.dtype = torch.complex64) -> torch.Tensor:
     return torch.arange(l_max).type(dtype).mul(2j * np.pi / l_max).exp()
 
-'''
+
 def _make_hippo(N: int) -> np.ndarray:
     def idx2value(n: int, k: int) -> Union[int, float]:
         if n > k:
@@ -42,7 +42,7 @@ def _make_hippo(N: int) -> np.ndarray:
         for j in range(N):
             hippo[i, j] = idx2value(i + 1, j + 1)
     return hippo
-'''
+
 def _make_diagonal(N: int) -> np.ndarray:
     def idx2value(n: int, k: int) -> Union[int, float]:
         if n == k:
@@ -91,7 +91,6 @@ def _non_circular_convolution(u: torch.Tensor, K: torch.Tensor) -> torch.Tensor:
     ud = rfft(F.pad(u.float(), pad=(0, 0, 0, l_max, 0, 0)), dim=1)
     Kd = rfft(F.pad(K.float(), pad=(0, l_max)), dim=-1)
     return irfft(ud.transpose(-2, -1) * Kd)[..., :l_max].transpose(-2, -1).type_as(u)
-
 
 class S4Layer(nn.Module):
     """S4 Layer.
