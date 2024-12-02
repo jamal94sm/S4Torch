@@ -3,7 +3,6 @@
     S4 Layer
 
 """
-
 from typing import Union
 
 import numpy as np
