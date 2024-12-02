@@ -115,7 +115,7 @@ class S4Layer(nn.Module):
         self.l_max = l_max
 
         self.B = nn.Parameter(init.xavier_normal_(torch.empty(n, d_model))) 
-        self.A = torch.nn.Parameter(torch.tensor(_make_diagonal(n), requires_grad=True).type_as(B))
+        self.A = torch.nn.Parameter(torch.tensor(_make_diagonal(n), requires_grad=True).type_as(self.B))
         self.C = nn.Parameter(init.xavier_normal_(torch.empty(d_model, n)))
         self.D = nn.Parameter(torch.ones(1, 1, d_model))
         self.step = nn.Parameter(_log_step_initializer(torch.rand(d_model))).exp()
