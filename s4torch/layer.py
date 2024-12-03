@@ -276,7 +276,7 @@ class S4Layer(nn.Module):
             y (torch.Tensor): a tensor of the form ``[BATCH, SEQ_LEN, D_OUTPUT]``
 
         """
-        k = self.K()
+        k = K()
         return _non_circular_convolution(u, K=k) + (self.D * u)
 
 
