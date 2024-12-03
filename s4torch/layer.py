@@ -275,7 +275,7 @@ class S4Layer(nn.Module):
 
         """
         #k = K()
-        return _non_circular_convolution(u, K=self.Kernel) + (self.D * u)
+        return _non_circular_convolution(u, K=Kernel()) + (self.D * u)
 
 
 
