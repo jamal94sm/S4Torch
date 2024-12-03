@@ -113,9 +113,9 @@ def Kernel(A, B, C, step, l_max) -> torch.Tensor:
           b = torch.tensor(B, requires_grad=False)
           b = np.array(b.cpu().numpy())
           c = torch.tensor(C, requires_grad=False)
-          c = np.array(c.b.cpu().numpy())
+          c = np.array(c.cpu().numpy())
           s = torch.tensor(step, requires_grad=False)
-          s = np.array(s.b.cpu().numpy())
+          s = np.array(s.cpu().numpy())
         
           I = np.eye(a.shape[0])
           Ab = a
