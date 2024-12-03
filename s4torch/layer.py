@@ -115,18 +115,26 @@ def diag_matrix_pow(A, l):
 
 def Kernel(A, B, C, step, l_max) -> torch.Tensor: 
           a = torch.tensor(A, requires_grad=False)
+          a = a.cuda()
           #a = np.array(a.cpu().numpy())
           b = torch.tensor(B, requires_grad=False)
+          b = b.cuda()
           #b = np.array(b.cpu().numpy())
           c = torch.tensor(C, requires_grad=False)
+          c = c.cuda()
           #c = np.array(c.cpu().numpy())
           s = torch.tensor(step, requires_grad=False)
+          s = s.cuda()
           #s = np.array(s.cpu().numpy())
         
           I = torch.eye(a.shape[0])
+          I = I.cuda()
           Ab = a
+          Ab = Ab.cuda()
           Bb = b
+          Bb = Bb.cuda()
           Cb = c
+          Cb = Cb.cuda()
           K = []
           for i in range(b.shape[1]):
                 BL = torch.inverse(I - (s[i] / 2.0) * a)
