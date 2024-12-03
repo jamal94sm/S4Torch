@@ -236,7 +236,7 @@ class S4Layer(nn.Module):
     
     
     @property
-    def K(self) -> torch.Tensor:  # noqa
+    def Kernel(self) -> torch.Tensor:  # noqa
       a = torch.tensor(self.A, requires_grad=False)
       a = np.array(a.cpu().numpy())
       b = torch.tensor(self.B, requires_grad=False)
@@ -276,8 +276,8 @@ class S4Layer(nn.Module):
             y (torch.Tensor): a tensor of the form ``[BATCH, SEQ_LEN, D_OUTPUT]``
 
         """
-        k = K()
-        return _non_circular_convolution(u, K=k) + (self.D * u)
+        #k = K()
+        return _non_circular_convolution(u, K=Kernel()) + (self.D * u)
 
 
 
