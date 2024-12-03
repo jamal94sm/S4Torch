@@ -107,7 +107,7 @@ def _non_circular_convolution(u: torch.Tensor, K: torch.Tensor) -> torch.Tensor:
     return irfft(ud.transpose(-2, -1) * Kd)[..., :l_max].transpose(-2, -1).type_as(u)
 
 
-
+'''
 
 class S4Layer(nn.Module):
     """S4 Layer.
@@ -277,7 +277,7 @@ class S4Layer(nn.Module):
 
         """
         return _non_circular_convolution(u, K=self.K) + (self.D * u)
-'''
+
 
 
 if __name__ == "__main__":
