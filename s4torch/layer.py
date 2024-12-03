@@ -238,13 +238,13 @@ class S4Layer(nn.Module):
     @property
     def K(self) -> torch.Tensor:  # noqa
       a = torch.tensor(self.A, requires_grad=False)
-      a = np.array(a)
+      a = np.array(a.cpu().numpy())
       b = torch.tensor(self.B, requires_grad=False)
-      b = np.array(b)
+      b = np.array(b.cpu().numpy())
       c = torch.tensor(self.C, requires_grad=False)
-      c = np.array(c)
+      c = np.array(c.b.cpu().numpy())
       s = torch.tensor(self.step, requires_grad=False)
-      s = np.array(s)
+      s = np.array(s.b.cpu().numpy())
     
       I = np.eye(a.shape[0])
       Ab = a
