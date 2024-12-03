@@ -108,6 +108,118 @@ def _non_circular_convolution(u: torch.Tensor, K: torch.Tensor) -> torch.Tensor:
 
 
 
+
+class S4Layer(nn.Module):
+    """S4 Layer.
+
+    Structured State Space for (Long) Sequences (S4) layer.
+
+    Args:
+        d_model (int): number of internal features
+        n (int): dimensionality of the state representation
+        l_max (int): length of input signal
+
+    Attributes:
+        omega_l (torch.Tensor): omega buffer (of length ``l_max``) used to obtain ``K``.
+        ifft_order (torch.Tensor): (re)ordering for output of ``torch.fft.ifft()``.
+
+    """
+
+    omega_l: torch.Tensor
+    ifft_order: torch.Tensor
+
+    def __init__(self, d_model: int, n: int, l_max: int) -> None:
+        super().__init__()
+        self.d_model = d_model
+        self.n = n
+        self.l_max = l_max
+
+        p, q, lambda_ = map(lambda t: t.type(torch.complex64), _make_p_q_lambda(n))
+        self._p = nn.Parameter(as_real(p))
+        self._q = nn.Parameter(as_real(q))
+        self._lambda_ = nn.Parameter(as_real(lambda_).unsqueeze(0).unsqueeze(1))
+
+        self.register_buffer(
+            "omega_l",
+            tensor=_make_omega_l(self.l_max, dtype=torch.complex64),
+        )
+        self.register_buffer(
+            "ifft_order",
+            tensor=torch.as_tensor(
+                [i if i == 0 else self.l_max - i for i in range(self.l_max)],
+                dtype=torch.long,
+            ),
+        )
+
+        self._B = nn.Parameter(
+            as_real(init.xavier_normal_(torch.empty(d_model, n, dtype=torch.complex64)))
+        )
+        self._Ct = nn.Parameter(
+            as_real(init.xavier_normal_(torch.empty(d_model, n, dtype=torch.complex64)))
+        )
+        self.D = nn.Parameter(torch.ones(1, 1, d_model))
+        self.log_step = nn.Parameter(_log_step_initializer(torch.rand(d_model)))
+
+    def extra_repr(self) -> str:
+        return f"d_model={self.d_model}, n={self.n}, l_max={self.l_max}"
+
+    @property
+    def p(self) -> torch.Tensor:
+        return torch.view_as_complex(self._p)
+
+    @property
+    def q(self) -> torch.Tensor:
+        return torch.view_as_complex(self._q)
+
+    @property
+    def lambda_(self) -> torch.Tensor:
+        return torch.view_as_complex(self._lambda_)
+
+    @property
+    def B(self) -> torch.Tensor:
+        return torch.view_as_complex(self._B)
+
+    @property
+    def Ct(self) -> torch.Tensor:
+        return torch.view_as_complex(self._Ct)
+
+    def _compute_roots(self) -> torch.Tensor:
+        a0, a1 = self.Ct.conj(), self.q.conj()
+        b0, b1 = self.B, self.p
+        step = self.log_step.exp()
+
+        g = torch.outer(2.0 / step, (1.0 - self.omega_l) / (1.0 + self.omega_l))
+        c = 2.0 / (1.0 + self.omega_l)
+        cauchy_dot_denominator = g.unsqueeze(-1) - self.lambda_
+
+        k00 = _cauchy_dot(a0 * b0, denominator=cauchy_dot_denominator)
+        k01 = _cauchy_dot(a0 * b1, denominator=cauchy_dot_denominator)
+        k10 = _cauchy_dot(a1 * b0, denominator=cauchy_dot_denominator)
+        k11 = _cauchy_dot(a1 * b1, denominator=cauchy_dot_denominator)
+        return c * (k00 - k01 * (1.0 / (1.0 + k11)) * k10)
+
+    @property
+    def K(self) -> torch.Tensor:  # noqa
+        """K convolutional filter."""
+        at_roots = self._compute_roots()
+        out = ifft(at_roots, n=self.l_max, dim=-1)
+        conv = torch.stack([i[self.ifft_order] for i in out]).real
+        return conv.unsqueeze(0)
+
+    def forward(self, u: torch.Tensor) -> torch.Tensor:
+        """Forward pass.
+
+        Args:
+            u (torch.Tensor): a tensor of the form ``[BATCH, SEQ_LEN, D_INPUT]``
+
+        Returns:
+            y (torch.Tensor): a tensor of the form ``[BATCH, SEQ_LEN, D_OUTPUT]``
+
+        """
+        return _non_circular_convolution(u, K=self.K) + (self.D * u)
+
+
+'''
 class S4Layer(nn.Module):
     def __init__(self, d_model: int, n: int, l_max: int) -> None:
         super().__init__()
@@ -165,6 +277,8 @@ class S4Layer(nn.Module):
 
         """
         return _non_circular_convolution(u, K=self.K) + (self.D * u)
+'''
+
 
 if __name__ == "__main__":
     N = 32
