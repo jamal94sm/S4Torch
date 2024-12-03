@@ -59,14 +59,14 @@ def _make_diagonal(N: int) -> np.ndarray:
             hippo[i, j] = idx2value(i + 1, j + 1)
     return hippo
 
-
+'''
 
 def diag_matrix_pow (A, l):
       x = np.diag(A)
       y = x**l
       return np.diag(y)
 
-
+'''
 
 def _make_nplr_hippo(N: int) -> tuple[np.ndarray, ...]:
     nhippo = -1 * _make_hippo(N)
@@ -107,29 +107,35 @@ def _non_circular_convolution(u: torch.Tensor, K: torch.Tensor) -> torch.Tensor:
     return irfft(ud.transpose(-2, -1) * Kd)[..., :l_max].transpose(-2, -1).type_as(u)
 
 
+def diag_matrix_pow(A, l):  
+    x = torch.diag(A)  # Extract diagonal elements  
+    y = x ** l         # Raise diagonal elements to the specified power  
+    return torch.diag(y)  # Construct a new diagonal matrix from raised elements
+
+
 def Kernel(A, B, C, step, l_max) -> torch.Tensor: 
           a = torch.tensor(A, requires_grad=False)
-          a = np.array(a.cpu().numpy())
+          #a = np.array(a.cpu().numpy())
           b = torch.tensor(B, requires_grad=False)
-          b = np.array(b.cpu().numpy())
+          #b = np.array(b.cpu().numpy())
           c = torch.tensor(C, requires_grad=False)
-          c = np.array(c.cpu().numpy())
+          #c = np.array(c.cpu().numpy())
           s = torch.tensor(step, requires_grad=False)
-          s = np.array(s.cpu().numpy())
+          #s = np.array(s.cpu().numpy())
         
-          I = np.eye(a.shape[0])
+          I = torch.eye(a.shape[0])
           Ab = a
           Bb = b
           Cb = c
           K = []
           for i in range(b.shape[1]):
-                BL = inv(I - (s[i] / 2.0) * a)
+                BL = torch.inverse(I - (s[i] / 2.0) * a)
                 Ab = BL @ (I + (s[i] / 2.0) * a)
                 Bb[:,i] = (BL * s[i]) @ (b[:,i])
                 #k = np.array([(Cb[i,:] @ matrix_power(Ab, l) @ Bb[:,i]).reshape() for l in range(self.l_max)])
-                k = np.array([(Cb[i,:] @ diag_matrix_pow(Ab, l) @ Bb[:,i]) for l in range(l_max)])
+                k = torch.tensor([(Cb[i,:] @ diag_matrix_pow(Ab, l) @ Bb[:,i]) for l in range(l_max)])
                 K.append(k)
-          K = np.array(K)
+          K = torch.stack(K)
           K = torch.tensor(K, requires_grad=True).unsqueeze(0)
           return K
     
