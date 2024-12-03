@@ -237,32 +237,30 @@ class S4Layer(nn.Module):
     
     @property
     def Kernel(self) -> torch.Tensor:  # noqa
-      a = torch.tensor(self.A, requires_grad=False)
-      a = np.array(a.cpu().numpy())
-      b = torch.tensor(self.B, requires_grad=False)
-      b = np.array(b.cpu().numpy())
-      c = torch.tensor(self.C, requires_grad=False)
-      c = np.array(c.b.cpu().numpy())
-      s = torch.tensor(self.step, requires_grad=False)
-      s = np.array(s.b.cpu().numpy())
-    
-      I = np.eye(a.shape[0])
-      Ab = a
-      Bb = b
-      Cb = c
-      K = []
-      for i in range(b.shape[1]):
-        BL = inv(I - (s[i] / 2.0) * a)
-        Ab = BL @ (I + (s[i] / 2.0) * a)
-        Bb[:,i] = (BL * s[i]) @ (b[:,i])
-        #k = np.array([(Cb[i,:] @ matrix_power(Ab, l) @ Bb[:,i]).reshape() for l in range(self.l_max)])
-        k = np.array([(Cb[i,:] @ diag_matrix_pow(Ab, l) @ Bb[:,i]) for l in range(self.l_max)])
-        K.append(k)
-    
-      K = np.array(K)
-      K = torch.tensor(K, requires_grad=True).unsqueeze(0)
-    
-      return K
+          a = torch.tensor(self.A, requires_grad=False)
+          a = np.array(a.cpu().numpy())
+          b = torch.tensor(self.B, requires_grad=False)
+          b = np.array(b.cpu().numpy())
+          c = torch.tensor(self.C, requires_grad=False)
+          c = np.array(c.b.cpu().numpy())
+          s = torch.tensor(self.step, requires_grad=False)
+          s = np.array(s.b.cpu().numpy())
+        
+          I = np.eye(a.shape[0])
+          Ab = a
+          Bb = b
+          Cb = c
+          K = []
+          for i in range(b.shape[1]):
+                BL = inv(I - (s[i] / 2.0) * a)
+                Ab = BL @ (I + (s[i] / 2.0) * a)
+                Bb[:,i] = (BL * s[i]) @ (b[:,i])
+                #k = np.array([(Cb[i,:] @ matrix_power(Ab, l) @ Bb[:,i]).reshape() for l in range(self.l_max)])
+                k = np.array([(Cb[i,:] @ diag_matrix_pow(Ab, l) @ Bb[:,i]) for l in range(self.l_max)])
+                K.append(k)
+          K = np.array(K)
+          K = torch.tensor(K, requires_grad=True).unsqueeze(0)
+          return K
 
 
 
@@ -277,7 +275,7 @@ class S4Layer(nn.Module):
 
         """
         #k = K()
-        return _non_circular_convolution(u, K=Kernel()) + (self.D * u)
+        return _non_circular_convolution(u, K=self.Kernel) + (self.D * u)
 
 
 
