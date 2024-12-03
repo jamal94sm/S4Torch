@@ -69,7 +69,7 @@ def diag_matrix_pow (A, l):
 
 
 def _make_nplr_hippo(N: int) -> tuple[np.ndarray, ...]:
-    nhippo = -1 * _make_diagonal(N)
+    nhippo = -1 * _make_hippo(N)
 
     p = 0.5 * np.sqrt(2 * np.arange(1, N + 1) + 1.0)
     q = 2 * p
