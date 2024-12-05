@@ -101,8 +101,8 @@ def _cauchy_dot(v: torch.Tensor, denominator: torch.Tensor) -> torch.Tensor:
 
 
 def _non_circular_convolution(u: torch.Tensor, K: torch.Tensor) -> torch.Tensor:
-    u = u.cuda()
-    K = K.cuda()
+    #u = u.cuda()
+    #K = K.cuda()
     l_max = u.shape[1]
     ud = rfft(F.pad(u.float(), pad=(0, 0, 0, l_max, 0, 0)), dim=1)
     Kd = rfft(F.pad(K.float(), pad=(0, l_max)), dim=-1)
