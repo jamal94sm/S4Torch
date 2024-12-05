@@ -115,37 +115,18 @@ def diag_matrix_pow(A, l):
     return torch.diag(y)  # Construct a new diagonal matrix from raised elements
 
 
-def Kernel(A, B, C, step, l_max) -> torch.Tensor: 
+def Kernel(A, B, C, step, d_model, l_max) -> torch.Tensor: 
           a = torch.tensor(A, requires_grad=False)
-          a = a.cuda()
-          #a = np.array(a.cpu().numpy())
           b = torch.tensor(B, requires_grad=False)
-          b = b.cuda()
-          #b = np.array(b.cpu().numpy())
           c = torch.tensor(C, requires_grad=False)
-          c = c.cuda()
-          #c = np.array(c.cpu().numpy())
           s = torch.tensor(step, requires_grad=False)
-          s = s.cuda()
-          #s = np.array(s.cpu().numpy())
-        
+
           I = torch.eye(a.shape[0])
-          I = I.cuda()
-          Ab = a
-          Ab = Ab.cuda()
-          Bb = b
-          Bb = Bb.cuda()
+          BL = torch.linalg.inv(I - (s.view(s.shape[0], 1, 1) / 2.0) * a.view(1, a.shape[0], a.shape[0]))
+          Ab = torch.bmm(BL, (I + (s.view(s.shape[0], 1, 1) / 2.0) * a.view(1, a.shape[0], a.shape[0])))
+          Bb = ((s.view(s.shape[0], 1, 1)*BL) @ b.t().unsqueeze(2)).squeeze(2).t()
           Cb = c
-          Cb = Cb.cuda()
-          K = []
-          for i in range(b.shape[1]):
-                BL = torch.inverse(I - (s[i] / 2.0) * a)
-                Ab = BL @ (I + (s[i] / 2.0) * a)
-                Bb[:,i] = (BL * s[i]) @ (b[:,i])
-                #k = np.array([(Cb[i,:] @ matrix_power(Ab, l) @ Bb[:,i]).reshape() for l in range(self.l_max)])
-                k = torch.tensor([(Cb[i,:] @ diag_matrix_pow(Ab, l) @ Bb[:,i]) for l in range(l_max)])
-                K.append(k)
-          K = torch.stack(K)
+          K = torch.tensor([[Cb[i, :] @ diag_matrix_pow(Ab[i, :, :], l) @ Bb[:, i] for l in range(l_max)] for i in range(d_model)])  
           K = torch.tensor(K, requires_grad=True).unsqueeze(0)
           return K
     
@@ -278,7 +259,7 @@ class S4Layer(nn.Module):
 
     
     def forward(self, u: torch.Tensor) -> torch.Tensor:
-        return _non_circular_convolution(u, K=Kernel(self.A, self.B, self.C, self.step, self.l_max)) + (self.D * u)
+        return _non_circular_convolution(u, K=Kernel(self.A, self.B, self.C, self.step, self.d_model, self.l_max)) + (self.D * u)
 
 
 
