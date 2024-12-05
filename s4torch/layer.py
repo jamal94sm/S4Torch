@@ -267,7 +267,8 @@ if __name__ == "__main__":
     N = 32
     d_model = 128
     l_max = 784
-
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    
     u = torch.randn(1, l_max, d_model)
 
     s4layer = S4Layer(d_model, n=N, l_max=l_max)
