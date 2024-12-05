@@ -261,7 +261,7 @@ class S4Layer(nn.Module):
 
     
     def forward(self, u: torch.Tensor) -> torch.Tensor:
-        return _non_circular_convolution(u, K=Kernel(self.A, self.B, self.C, self.step, self.d_model, self.l_max, self.device), self.device) + (self.D * u)
+        return _non_circular_convolution(u, K=Kernel(self.A, self.B, self.C, self.step, self.d_model, self.l_max, self.device), device = self.device) + (self.D * u)
 
 
 
