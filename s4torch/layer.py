@@ -101,8 +101,8 @@ def _cauchy_dot(v: torch.Tensor, denominator: torch.Tensor) -> torch.Tensor:
 
 
 def _non_circular_convolution(u: torch.Tensor, K: torch.Tensor) -> torch.Tensor:
-    #u = u.cuda()
-    #K = K.cuda()
+    u = u.to(device)
+    K = K.to(device)
     l_max = u.shape[1]
     ud = rfft(F.pad(u.float(), pad=(0, 0, 0, l_max, 0, 0)), dim=1)
     Kd = rfft(F.pad(K.float(), pad=(0, l_max)), dim=-1)
@@ -116,12 +116,12 @@ def diag_matrix_pow(A, l):
 
 
 def Kernel(A, B, C, step, d_model, l_max) -> torch.Tensor: 
-          a = torch.tensor(A, requires_grad=False)
-          b = torch.tensor(B, requires_grad=False)
-          c = torch.tensor(C, requires_grad=False)
-          s = torch.tensor(step, requires_grad=False)
+          a = torch.tensor(A, requires_grad=False).to(device)
+          b = torch.tensor(B, requires_grad=False).to(device)
+          c = torch.tensor(C, requires_grad=False).to(device)
+          s = torch.tensor(step, requires_grad=False).to(device)
 
-          I = torch.eye(a.shape[0])
+          I = torch.eye(a.shape[0]).to(device)
           BL = torch.linalg.inv(I - (s.view(s.shape[0], 1, 1) / 2.0) * a.view(1, a.shape[0], a.shape[0]))
           Ab = torch.bmm(BL, (I + (s.view(s.shape[0], 1, 1) / 2.0) * a.view(1, a.shape[0], a.shape[0])))
           Bb = ((s.view(s.shape[0], 1, 1)*BL) @ b.t().unsqueeze(2)).squeeze(2).t()
