@@ -100,7 +100,7 @@ def _cauchy_dot(v: torch.Tensor, denominator: torch.Tensor) -> torch.Tensor:
 
 
 
-def _non_circular_convolution(u: torch.Tensor, K: torch.Tensor) -> torch.Tensor:
+def _non_circular_convolution(u: torch.Tensor, K: torch.Tensor, device) -> torch.Tensor:
     u = u.to(device)
     K = K.to(device)
     l_max = u.shape[1]
@@ -115,7 +115,7 @@ def diag_matrix_pow(A, l):
     return torch.diag(y)  # Construct a new diagonal matrix from raised elements
 
 
-def Kernel(A, B, C, step, d_model, l_max) -> torch.Tensor: 
+def Kernel(A, B, C, step, d_model, l_max, device) -> torch.Tensor: 
           a = torch.tensor(A, requires_grad=False).to(device)
           b = torch.tensor(B, requires_grad=False).to(device)
           c = torch.tensor(C, requires_grad=False).to(device)
@@ -249,6 +249,8 @@ class S4Layer(nn.Module):
         self.d_model = d_model
         self.n = n
         self.l_max = l_max
+        
+        self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
         self.B = nn.Parameter(init.xavier_normal_(torch.empty(n, d_model))) 
         self.A = torch.nn.Parameter(torch.tensor(_make_diagonal(n), requires_grad=True).type_as(self.B))
@@ -259,7 +261,7 @@ class S4Layer(nn.Module):
 
     
     def forward(self, u: torch.Tensor) -> torch.Tensor:
-        return _non_circular_convolution(u, K=Kernel(self.A, self.B, self.C, self.step, self.d_model, self.l_max)) + (self.D * u)
+        return _non_circular_convolution(u, K=Kernel(self.A, self.B, self.C, self.step, self.d_model, self.l_max, self.device), self.device) + (self.D * u)
 
 
 
@@ -267,7 +269,6 @@ if __name__ == "__main__":
     N = 32
     d_model = 128
     l_max = 784
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
     
     u = torch.randn(1, l_max, d_model)
 
