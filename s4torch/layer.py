@@ -49,7 +49,7 @@ def _make_hippo(N: int) -> np.ndarray:
 def _make_diagonal(N: int) -> np.ndarray:
     def idx2value(n: int, k: int) -> Union[int, float]:
         if n == k:
-            return n + 1
+            return 1
         else:
             return 0
 
@@ -60,8 +60,8 @@ def _make_diagonal(N: int) -> np.ndarray:
     return hippo
 
 
-def _make_nplr_hippo(N: int, A) -> tuple[np.ndarray, ...]:
-    nhippo = -1 * A
+def _make_nplr_hippo(N: int) -> tuple[np.ndarray, ...]:
+    nhippo = -1 * _make_diagonal(N)
 
     p = 0.5 * np.sqrt(2 * np.arange(1, N + 1) + 1.0)
     q = 2 * p
@@ -72,8 +72,8 @@ def _make_nplr_hippo(N: int, A) -> tuple[np.ndarray, ...]:
 
 
 
-def _make_p_q_lambda(n: int, A) -> list[torch.Tensor]:
-    lambda_, p, q, V = _make_nplr_hippo(n,A)
+def _make_p_q_lambda(n: int) -> list[torch.Tensor]:
+    lambda_, p, q, V = _make_nplr_hippo(n)
     Vc = V.conj().T
     p = Vc @ p
     q = Vc @ q.conj()
@@ -149,10 +149,10 @@ class S4Layer(nn.Module):
         self.n = n
         self.l_max = l_max
 
-        a = torch.ones(1, n)
-        self._A = nn.Parameter(torch.ones(1, n))
-        A = np.diag(a)
-        p, q, lambda_ = map(lambda t: t.type(torch.complex64), _make_p_q_lambda(n, A))
+        #a = torch.ones(1, n)
+        #self._A = nn.Parameter(torch.ones(1, n))
+        #A = np.diag(a)
+        p, q, lambda_ = map(lambda t: t.type(torch.complex64), _make_p_q_lambda(n))
         self._p = nn.Parameter(as_real(p))
         self._q = nn.Parameter(as_real(q))
         self._lambda_ = nn.Parameter(as_real(lambda_).unsqueeze(0).unsqueeze(1))
