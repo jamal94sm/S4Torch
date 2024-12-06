@@ -149,8 +149,9 @@ class S4Layer(nn.Module):
         self.n = n
         self.l_max = l_max
 
+        a = torch.ones(1, n)
         self._A = nn.Parameter(torch.ones(1, n))
-        A = np.diag(self._A)
+        A = np.diag(a)
         p, q, lambda_ = map(lambda t: t.type(torch.complex64), _make_p_q_lambda(n, A))
         self._p = nn.Parameter(as_real(p))
         self._q = nn.Parameter(as_real(q))
