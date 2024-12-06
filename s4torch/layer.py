@@ -59,17 +59,9 @@ def _make_diagonal(N: int) -> np.ndarray:
             hippo[i, j] = idx2value(i + 1, j + 1)
     return hippo
 
-'''
 
-def diag_matrix_pow (A, l):
-      x = np.diag(A)
-      y = x**l
-      return np.diag(y)
-
-'''
-
-def _make_nplr_hippo(N: int) -> tuple[np.ndarray, ...]:
-    nhippo = -1 * _make_hippo(N)
+def _make_nplr_hippo(N: int, A) -> tuple[np.ndarray, ...]:
+    nhippo = -1 * A
 
     p = 0.5 * np.sqrt(2 * np.arange(1, N + 1) + 1.0)
     q = 2 * p
@@ -130,7 +122,7 @@ def Kernel(A, B, C, step, d_model, l_max, device) -> torch.Tensor:
           K = torch.tensor(K, requires_grad=True).unsqueeze(0)
           return K
     
-'''
+
 
 class S4Layer(nn.Module):
     """S4 Layer.
@@ -157,7 +149,9 @@ class S4Layer(nn.Module):
         self.n = n
         self.l_max = l_max
 
-        p, q, lambda_ = map(lambda t: t.type(torch.complex64), _make_p_q_lambda(n))
+        Self._A = nn.Parameter(torch.ones(1, n))
+        A = np.diag(self._A)
+        p, q, lambda_ = map(lambda t: t.type(torch.complex64), _make_p_q_lambda(n, A))
         self._p = nn.Parameter(as_real(p))
         self._q = nn.Parameter(as_real(q))
         self._lambda_ = nn.Parameter(as_real(lambda_).unsqueeze(0).unsqueeze(1))
@@ -263,7 +257,7 @@ class S4Layer(nn.Module):
     def forward(self, u: torch.Tensor) -> torch.Tensor:
         return _non_circular_convolution(u, K=Kernel(self.A, self.B, self.C, self.step, self.d_model, self.l_max, self.device), device = self.device) + (self.D * u)
 
-
+'''
 
 if __name__ == "__main__":
     N = 32
