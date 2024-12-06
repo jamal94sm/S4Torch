@@ -72,8 +72,8 @@ def _make_nplr_hippo(N: int, A) -> tuple[np.ndarray, ...]:
 
 
 
-def _make_p_q_lambda(n: int) -> list[torch.Tensor]:
-    lambda_, p, q, V = _make_nplr_hippo(n)
+def _make_p_q_lambda(n: int, A) -> list[torch.Tensor]:
+    lambda_, p, q, V = _make_nplr_hippo(n,A)
     Vc = V.conj().T
     p = Vc @ p
     q = Vc @ q.conj()
